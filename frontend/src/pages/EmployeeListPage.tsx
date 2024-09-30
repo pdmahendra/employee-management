@@ -3,10 +3,7 @@ import { EmployeeListTable } from "../components/EmployeeListTable";
 import Navbar from "../components/Navbar";
 
 const EmployeeListPage = () => {
-  const { data: employeeList, isLoading } = useFetchEmployeeList();
-
-  console.log(employeeList);
-
+  const { data: employeeList, isLoading, refetch } = useFetchEmployeeList();
   if (isLoading) {
     return <div></div>;
   }
@@ -14,7 +11,7 @@ const EmployeeListPage = () => {
   return (
     <>
       <Navbar />
-      <EmployeeListTable employeeList={employeeList} />
+      <EmployeeListTable employeeList={employeeList} refetch={refetch} />
     </>
   );
 };
