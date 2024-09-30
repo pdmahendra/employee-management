@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/Table";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 type Employee = {
@@ -55,6 +55,8 @@ export function EmployeeListTable({
 
   const handleDeleteTicket = (id: string) => {
     // setEmployeeList((prev) => prev.filter((emp) => emp.uniqueId !== id));
+    console.log(id);
+    
   };
   const handleEditTicket = (id: string) => {
     navigate(`/edit/${id}`);
