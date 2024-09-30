@@ -3,14 +3,35 @@ import Employee, { IEmployee } from "../models/employeeModel";
 
 export const createEmployee = async (req: any, res: Response) => {
   try {
-    const { name, email, mobile, designation, gender, course } = req.body;
-
-    if (!name || !email || !mobile || !designation || !gender || !course) {
-      return res.status(400).json({ message: "All fields are required" });
+    const { name, email, mobile, designation, gender, courses } = req.body;
+    if (!name) {
+      return res.status(400).json({ message: "Name is required" });
     }
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+    if (!mobile) {
+      return res.status(400).json({ message: "Mobile number is required" });
+    }
+    if (!designation) {
+      return res.status(400).json({ message: "Designation is required" });
+    }
+    if (!gender) {
+      return res.status(400).json({ message: "Gender is required" });
+    }
+    if (!courses) {
+      return res.status(400).json({ message: "Courses are required" });
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    if (!emailRegex.test(email)) {
+      return res
+        .status(400)
+        .json({ message: "Email must be a valid Gmail address" });
+    }
+    const userId = req.user?._id;
+    const isEmployeeExist = await Employee.findOne({ email, userId });
 
-    const isEmployeeExist = await Employee.findOne({ email });
-    if (isEmployeeExist) { 
+    if (isEmployeeExist) {
       return res
         .status(400)
         .json({ message: "Employee with same email already exists" });
@@ -21,11 +42,10 @@ export const createEmployee = async (req: any, res: Response) => {
       mobile,
       designation,
       gender,
-      course,
+      courses,
       image: `${req.file?.filename}`,
       userId: req.user?._id,
     });
-    
 
     await employee.save();
 
@@ -52,62 +72,64 @@ export const getEmployeeList = async (req: any, res: Response) => {
 };
 
 export const getEmployeeById = async (req: any, res: Response) => {
-    try {
-      const userId = req.user?._id; 
-      const employeeId = req.params.id; 
-  
-      const employee = await Employee.findOne({ _id: employeeId, userId });
-  
-      if (!employee) {
-        return res.status(404).json({ message: "Employee not found"});
-      }
-  
-      return res.status(200).json({
-        message: "Employee fetched successfully",
-        employee,
-      });
-    } catch (error) {
-      return res.status(500).json({ message: "Server error", error });
+  try {
+    const userId = req.user?._id;
+    const employeeId = req.params.id;
+
+    const employee = await Employee.findOne({ _id: employeeId, userId });
+
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
     }
-  };
+
+    return res.status(200).json({
+      message: "Employee fetched successfully",
+      employee,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error });
+  }
+};
 
 export const editEmployee = async (req: Request, res: Response) => {
-    try {
-      const employeeId = req.params.id;
-      const updatedFields: Partial<IEmployee> = req.body; 
-  
-      const employee = await Employee.findById(employeeId);
-      if (!employee) {
-        return res.status(404).json({ message: "Employee not found" });
-      }
-  
-      if (req.file) {
-        updatedFields.image = req.file.path; 
-      }
-  
-      Object.assign(employee, updatedFields);
-  
-      await employee.save();
-  
-      return res.status(200).json({ message: "Employee updated successfully", employee });
-    } catch (error) {
-      return res.status(500).json({ message: "Server error", error });
+  try {
+    const employeeId = req.params.id;
+    const updatedFields: Partial<IEmployee> = req.body;
+
+    const employee = await Employee.findById(employeeId);
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
     }
-  };
+
+    // if (req.file) {
+    //   updatedFields.image = req.file.path;
+    // }
+
+    Object.assign(employee, updatedFields);
+
+    await employee.save();
+
+    return res
+      .status(200)
+      .json({ message: "Employee updated successfully", employee });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error });
+  }
+};
 
 export const deleteEmployee = async (req: Request, res: Response) => {
-    try {
-      const employeeId = req.params.id;
-  
-      const employee = await Employee.findById(employeeId);
-      if (!employee) {
-        return res.status(404).json({ message: "Employee not found" });
-      }
-  
-      await Employee.findByIdAndDelete(employeeId);
-  
-      return res.status(200).json({ message: "Employee deleted successfully" });
-    } catch (error) {
-      return res.status(500).json({ message: "Server error", error });
+  try {
+    const employeeId = req.params.id;
+
+    const employee = await Employee.findById(employeeId);
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
     }
-  };
+
+    await Employee.findByIdAndDelete(employeeId);
+
+    return res.status(200).json({ message: "Employee deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error });
+  }
+};
