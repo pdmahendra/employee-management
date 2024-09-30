@@ -15,7 +15,6 @@ export const authUser = async (req: any, res: Response, next: NextFunction) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
       userId: string;
     };
-    console.log(decoded);
 
     const user = await User.findById(decoded.userId);
 
