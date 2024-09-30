@@ -22,26 +22,29 @@ import {
   TableRow,
 } from "./ui/Table";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import CreateEmployeeDialog from "../pages/CreateEmployee";
+import { deleteEmployee } from "../api/query/deleteEmployee";
+import toast from "react-hot-toast";
+import EditEmployeeDialog from "../pages/EditEmployee";
 
 type Employee = {
-  uniqueId: string;
+  _id: string;
   image: string;
   name: string;
   email: string;
   mobile: string;
   designation: string;
   gender: string;
-  course: string;
-  createDate: string;
+  courses: string[];
+  createdAt: string;
 };
 
-export function EmployeeListTable({
-  employeeList,
-}: {
+type EmployeeProps = {
+  refetch: () => void;
   employeeList: Employee[];
-}) {
-  const navigate = useNavigate();
+};
+
+export function EmployeeListTable({ employeeList, refetch }: EmployeeProps) {
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 10;
 
@@ -53,42 +56,38 @@ export function EmployeeListTable({
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  const handleDeleteTicket = (id: string) => {
-    // setEmployeeList((prev) => prev.filter((emp) => emp.uniqueId !== id));
+  const handleDelete = async (id: string) => {
     console.log(id);
-    
-  };
-  const handleEditTicket = (id: string) => {
-    navigate(`/edit/${id}`);
-  };
 
-  const imgUrl = (img: any) => {
-    return `../../../backend/uploads/${img}`;
+    try {
+      await deleteEmployee(id.trim());
+      toast.success("Employee deleted successfully!");
+      refetch();
+    } catch (error) {
+      const message = "Error deleting employee.";
+      toast.error(message);
+      console.error("Delete error:", error);
+    }
   };
 
   const columns: ColumnDef<Employee>[] = [
     {
-      accessorKey: "uniqueId",
+      accessorKey: "_id",
       header: "unique Id",
-      cell: ({ row }: { row: { original: Employee } }) => (
-        <div className="">{row.original.uniqueId}</div>
+      cell: ({ row }: { row: { index: number } }) => (
+        <div className="">{row.index + 1} </div>
       ),
     },
-    {
-      accessorKey: "img",
-      header: "Image",
-      cell: ({ row }: { row: { original: Employee } }) => {
-        const imgg = row.original.image;
-        console.log(imgg);
+    // {
+    //   accessorKey: "img",
+    //   header: "Image",
+    //   cell: ({ row }: { row: { original: Employee } }) => {
 
-        const imgpath = imgUrl("1727708100301-pexels-wendywei-1190297.jpg");
-        console.log(imgpath);
-        
-        return (
-          <img src={"imgpath"} alt="img" className="h-12 w-12 object-cover" />
-        );
-      },
-    },
+    //     return (
+    //       <img src={imgpath} alt="img" className="h-12 w-12 object-cover" />
+    //     );
+    //   },
+    // },
     {
       accessorKey: "name",
       header: "Name",
@@ -125,33 +124,40 @@ export function EmployeeListTable({
       ),
     },
     {
-      accessorKey: "course",
-      header: "Course",
+      accessorKey: "courses",
+      header: "Courses",
       cell: ({ row }: { row: { original: Employee } }) => (
-        <div className="">{row.original.course}</div>
+        <div>
+          {row.original.courses && row.original.courses.length > 0 ? (
+            row.original.courses.map((course: string, index: number) => (
+              <span key={index} className="">
+                {course} {index < row.original.courses.length - 1 && ", "}
+              </span>
+            ))
+          ) : (
+            <span>No courses available</span>
+          )}
+        </div>
       ),
     },
     {
-      accessorKey: "createDate",
+      accessorKey: "createdAt",
       header: "Create Date",
       cell: ({ row }: { row: { original: Employee } }) => (
-        <div className="">{row.original.createDate}</div>
+        <div className="">{row.original.createdAt.split("T")[0]}</div>
       ),
     },
     {
       accessorKey: "",
       header: "Action",
       cell: ({ row }: { row: { original: Employee } }) => (
-        <div className="pr-10 flex gap-4">
-          <button
-            onClick={() => handleEditTicket(row.original.uniqueId)}
-            className="px-4 py-1 bg-blue-500 text-white rounded"
-          >
-            Edit
+        <div className="flex gap-2">
+          <button>
+            <EditEmployeeDialog refetch={refetch} id={row.original._id} />{" "}
           </button>
           <button
-            onClick={() => handleDeleteTicket(row.original.uniqueId)}
-            className="px-4 py-1 bg-red-500 text-white rounded"
+            onClick={() => handleDelete(row.original._id)}
+            className="px-2 py-1 bg-gray-500 text-white rounded"
           >
             Delete
           </button>
@@ -188,7 +194,12 @@ export function EmployeeListTable({
 
   return (
     <div className="mt-6 min-w-[300px] w-full p-4">
-      <h3 className="text-2xl font-medium px-4">Employee List</h3>
+      <div className="flex justify-between">
+        <h3 className="text-xl font-medium px-4">Employee List</h3>
+        <div>
+          <CreateEmployeeDialog refetch={refetch} />
+        </div>
+      </div>{" "}
       <div className="border border-gray-300 rounded-3xl px-6 mt-4">
         <div className="mt-4 flex flex-col sm:flex-row justify-between items-center p-2 px-4 gap-4 sm:gap-0">
           <div className="relative flex items-center w-full sm:w-auto">
@@ -197,7 +208,7 @@ export function EmployeeListTable({
               value={
                 (table.getColumn("name")?.getFilterValue() as string) ?? ""
               }
-              onChange={(event) =>
+               onChange={(event) =>
                 table.getColumn("name")?.setFilterValue(event.target.value)
               }
               className="w-full sm:w-auto !pl-14 !h-12 !rounded-full !bg-[#E6E6E682] py-3 pl-10 border-none focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-sm lg:w-80"

@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 
 export const fetchEmployeeList = async () => {
   const response = await axios.get(`${API.employee.fetchEmployeeList}`);
-  console.log(response.data.employees);
   return response.data.employees;
 };
 
