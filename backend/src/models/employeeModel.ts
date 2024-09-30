@@ -6,8 +6,8 @@ export interface IEmployee extends Document {
   mobile: number;
   designation: "HR" | "Manager" | "Sales";
   gender: "Male" | "Female";
-  course: "MCA" | "BCA" | "BSC";
-  image: string;
+  course: string[];
+  // image: string;
   userId: mongoose.Types.ObjectId;
   createdAt: string;
 }
@@ -23,12 +23,13 @@ const employeeSchema: Schema = new Schema(
       required: true,
     },
     gender: { type: String, enum: ["Male", "Female"], required: true },
-    course: { type: String, enum: ["MCA", "BCA", "BSC"], required: true },
-    image: { type: String, required: true },
+    courses: { type: [String], required: true },
+    // image: { type: String, required: false },
     userId: { type: mongoose.Types.ObjectId, ref: "User", required: true },
   },
   { timestamps: true }
 );
+
 
 const Employee = mongoose.model<IEmployee>("Employee", employeeSchema);
 
