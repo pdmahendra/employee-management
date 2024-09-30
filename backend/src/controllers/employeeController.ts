@@ -10,12 +10,11 @@ export const createEmployee = async (req: any, res: Response) => {
     }
 
     const isEmployeeExist = await Employee.findOne({ email });
-    if (isEmployeeExist) {
+    if (isEmployeeExist) { 
       return res
         .status(400)
         .json({ message: "Employee with same email already exists" });
     }
-
     const employee: IEmployee = new Employee({
       name,
       email,
@@ -23,9 +22,10 @@ export const createEmployee = async (req: any, res: Response) => {
       designation,
       gender,
       course,
-      image: req.file?.path,
+      image: `${req.file?.filename}`,
       userId: req.user?._id,
     });
+    
 
     await employee.save();
 

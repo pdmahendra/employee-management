@@ -7,8 +7,8 @@ export interface IEmployee extends Document {
   designation: "HR" | "Manager" | "Sales";
   gender: "Male" | "Female";
   course: "MCA" | "BCA" | "BSC";
-  image: string; // Path to the uploaded image
-  userId: mongoose.Types.ObjectId; // Reference to the user who created the employee
+  image: string;
+  userId: mongoose.Types.ObjectId;
   createdAt: string;
 }
 
@@ -24,8 +24,8 @@ const employeeSchema: Schema = new Schema(
     },
     gender: { type: String, enum: ["Male", "Female"], required: true },
     course: { type: String, enum: ["MCA", "BCA", "BSC"], required: true },
-    image: { type: String, required: true }, // Store image path
-    userId: { type: mongoose.Types.ObjectId, ref: "User", required: true }, // Reference to the user
+    image: { type: String, required: true },
+    userId: { type: mongoose.Types.ObjectId, ref: "User", required: true },
   },
   { timestamps: true }
 );

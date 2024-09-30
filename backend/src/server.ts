@@ -2,6 +2,7 @@ import express, { Application, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import { connectDB } from './db/db';
+import path from 'path';
 //import routes
 import authRoutes from "./routes/authRoutes"
 import employeeRoutes from "./routes/employeeRoutes"
@@ -12,12 +13,13 @@ const app: Application = express();
 
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 //declare route
-app.use('/api/v1/user', authRoutes);
+app.use('/api/v1', authRoutes);
 app.use('/api/v1', employeeRoutes);
-app.use('/api/v1', express.static('uploads'));
+
 
 
 
